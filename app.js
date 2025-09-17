@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 const db = mysql.createConnection({
-  host: process.env.DB_HOST, // Use IP real se for rodar em outro servidor
+  host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME
@@ -51,6 +51,21 @@ app.put("/produtos/:id", (req, res) => {
   });
 });
 
+// Rota: Deletar produto
+app.delete("/produtos/:id", (req, res) => {
+    const { id } = req.params;
+
+    const sqlDelete = "DELETE FROM produtos WHERE id = ?";
+    db.query(sqlDelete, [id], (err, result) => {
+        if (err) {
+            console.error("Erro ao deletar produto:", err);
+            return res.status(500).json({ error: "Erro ao deletar produto" });
+        }
+        res.status(200).json({ status: "Produto deletado com sucesso" });
+    });
+});
+
+
 // Rota: Realizar movimentação (entrada/saída)
 app.post("/movimentacao", (req, res) => {
   const { produto_id, usuario, tipo, quantidade, descricao } = req.body;
@@ -83,6 +98,7 @@ app.get("/movimentacoes", (req, res) => {
   const sql = `
     SELECT 
       m.id,
+      m.produto_id,
       m.tipo,
       m.quantidade,
       m.usuario,
@@ -121,4 +137,3 @@ app.post("/login", (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
-
