@@ -8,11 +8,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10, // quantas conexões simultâneas no máximo
+  queueLimit: 0
 });
 
 // Rota: Listar todos os produtos
@@ -119,19 +122,29 @@ app.get("/movimentacoes", (req, res) => {
 });
 
 // Rota: Login
-app.post("/login", (req, res) => {
-  const { usuario, senha } = req.body;
-  const sql = "SELECT * FROM login WHERE usuario = ? AND senha = ?";
-  db.query(sql, [usuario, senha], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+const pool = require('./db'); // importa o pool
 
-    if (results.length > 0) {
-      res.json({ message: "Login realizado com sucesso!" });
-    } else {
-      res.status(401).json({ error: "Usuário ou senha inválidos" });
+app.post('/login', (req, res) => {
+  const { usuario, senha } = req.body;
+
+  db.query(
+    'SELECT * FROM usuarios WHERE usuario = ? AND senha = ?',
+    [usuario, senha],
+    (err, results) => {
+      if (err) {
+        console.error('Erro ao realizar login:', err);
+        return res.status(500).json({ error: 'Erro interno no servidor' });
+      }
+
+      if (results.length > 0) {
+        res.json({ success: true, user: results[0] });
+      } else {
+        res.status(401).json({ error: 'Usuário ou senha incorretos' });
+      }
     }
-  });
+  );
 });
+
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
