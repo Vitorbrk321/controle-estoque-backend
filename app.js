@@ -15,7 +15,9 @@ const db = mysql.createPool({
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10, // quantas conexões simultâneas no máximo
-  queueLimit: 0
+  queueLimit: 0,
+  connectTimeout: 10000
+  
 });
 
 // Rota: Listar todos os produtos
