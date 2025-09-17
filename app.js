@@ -122,8 +122,6 @@ app.get("/movimentacoes", (req, res) => {
 });
 
 // Rota: Login
-const pool = require('./db'); // importa o pool
-
 app.post('/login', (req, res) => {
   const { usuario, senha } = req.body;
 
