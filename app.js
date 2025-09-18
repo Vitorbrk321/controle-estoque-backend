@@ -128,7 +128,7 @@ app.post('/login', (req, res) => {
   const { usuario, senha } = req.body;
 
   db.query(
-    'SELECT * FROM usuarios WHERE usuario = ? AND senha = ?',
+    'SELECT * FROM login WHERE usuario = ? AND senha = ?',
     [usuario, senha],
     (err, results) => {
       if (err) {
